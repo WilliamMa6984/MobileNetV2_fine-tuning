@@ -16,12 +16,13 @@ def load_data(basePath):
     @return
         x: a list of the image data, with shape (:, 150, 150, 3)
         y: the list of class labels associated with the corresponding image data
+        keys: key for the string representation of y
     """
 
     keys, flowers = load_filepaths(basePath)
-    x, y = load_images(flowers, keys)
+    x, y = load_images(flowers)
     # plot_images(x, y)
-    return x, y
+    return x, y, keys
 
 def load_filepaths(basePath):
     """
@@ -42,13 +43,17 @@ def load_filepaths(basePath):
 
     return ['daisy', 'dandelion', 'roses', 'sunflowers', 'tulips'], [daisy, dandelion, roses, sunflowers, tulips]
 
-def load_images(image_paths, keys):
+def load_images(image_paths):
     """
     Load the given image file paths
 
     @param
         image_paths: 2D list of image file paths dimensions are: (class, file_path)
         keys: class labels associated with the image_paths 2D list
+
+    @return
+        x: a list of the image data, with shape (:, 150, 150, 3)
+        y: the list of class labels associated with the corresponding image data
     """
 
     # round robbin to concatenate the arrays
@@ -65,7 +70,7 @@ def load_images(image_paths, keys):
                 img = cv2.cvtColor(cv2.imread(f_class[i]), cv2.COLOR_BGR2RGB) / 255.0
                 x_ = tf.image.resize(img, (150, 150)).numpy()
                 x.append(x_)
-                y.append(keys[k])
+                y.append(k) # number for label
     
     return np.array(x), np.array(y)
 
