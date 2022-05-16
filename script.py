@@ -1,17 +1,18 @@
-import matplotlib.pyplot as plt     # for plotting
-import numpy as np                  # for reshaping, array manipulation
-import cv2                          # for image loading and colour conversion
-import tensorflow as tf             # for bulk image resize
+import matplotlib.pyplot as plt
+import numpy as np
+import cv2
+import tensorflow as tf
+from imageio import imread
 import os
 import glob
-import random
 
 # Loading the images ======================================================
-def load_data(basePath):
+def load_data(basePath, img_size):
     """
     Get the x, y data for the images
     @param
         basePath: the base directory to find the structured flower images in
+        img_size: dimension of the image (both x and y)
     
     @return
         x: a list of the image data, with shape (:, 150, 150, 3)
@@ -20,7 +21,7 @@ def load_data(basePath):
     """
 
     keys, flowers = load_filepaths(basePath)
-    x, y = load_images(flowers)
+    x, y = load_images(flowers, img_size)
     # plot_images(x, y)
     return x, y, keys
 
@@ -43,13 +44,13 @@ def load_filepaths(basePath):
 
     return ['daisy', 'dandelion', 'roses', 'sunflowers', 'tulips'], [daisy, dandelion, roses, sunflowers, tulips]
 
-def load_images(image_paths):
+def load_images(image_paths, img_size):
     """
     Load the given image file paths
 
     @param
         image_paths: 2D list of image file paths dimensions are: (class, file_path)
-        keys: class labels associated with the image_paths 2D list
+        img_size: dimension of the image (both x and y)
 
     @return
         x: a list of the image data, with shape (:, 150, 150, 3)
@@ -68,7 +69,7 @@ def load_images(image_paths):
             if i < len(f_class):
                 # load image
                 img = cv2.cvtColor(cv2.imread(f_class[i]), cv2.COLOR_BGR2RGB) / 255.0
-                x_ = tf.image.resize(img, (150, 150)).numpy()
+                x_ = tf.image.resize(img, (img_size, img_size)).numpy()
                 x.append(x_)
                 y.append(k) # number for label
     
