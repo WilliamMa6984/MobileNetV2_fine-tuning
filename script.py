@@ -84,6 +84,7 @@ def plot_images(x, y):
         y: class labels
     """
     fig = plt.figure(figsize=[15, 15])
+    fig.set_facecolor('white')
     for i in range(10):
         ax = fig.add_subplot(5, 5, i + 1)
         ax.imshow(x[i])
