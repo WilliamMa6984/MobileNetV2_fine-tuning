@@ -200,10 +200,13 @@ def eval_model(model, x_train, y_train, x_test, y_test, history):
 
 # END Compile and fine tune model ======================================================
 
-if __name__ == "__main__":
-    img_size = 96
-
-    basePath = "C:\\Users\\n10491694\\Downloads\\small_flower_dataset\\" # replace with correct path
+def load_train_test(basePath, img_size):
+    """
+    Loads the data, and splits it into train and test sets.
+    @param
+        basePath: Path to the small flower dataset (must have the last backslash '\\')
+        img_size: target width and height of the image
+    """
 
     x, y, labels = load_data(basePath, img_size)
     # plot_images(x, y)
@@ -214,26 +217,34 @@ if __name__ == "__main__":
     test_X = x[750:]
     test_y = y[750:]
 
-    lr = 0.01
-    mmtm = 0
-    model, history = compile_and_tune(train_X, train_y, lr, mmtm, img_size, 10)
+    return train_X, train_y, test_X, test_y
+
+def compile_and_evaluate(lr, mmtm, epochs):
+    """
+    Compiles, retrains, and evaluates the model.
+    @param
+        lr: model learning rate
+        mmtm: model momentum
+        epochs: number of epochs to train
+    """
+
+    model, history = compile_and_tune(train_X, train_y, lr, mmtm, img_size, epochs)
     eval_model(model, train_X, train_y, test_X, test_y, history)
     plt.show()
 
-    lr = 0.001
-    mmtm = 0
-    model, history = compile_and_tune(train_X, train_y, lr, mmtm, img_size, 40)
-    eval_model(model, train_X, train_y, test_X, test_y, history)
-    plt.show()
+if __name__ == "__main__":
+    img_size = 96
+    basePath = "D:\\Desktop\\CAB320\\small_flower_dataset\\" # replace with correct path
+    train_X, train_y, test_X, test_y = load_train_test(basePath, img_size)
 
-    lr = 0.0001
-    mmtm = 0
-    model, history = compile_and_tune(train_X, train_y, lr, mmtm, img_size, 100)
-    eval_model(model, train_X, train_y, test_X, test_y, history)
-    plt.show()
+    compile_and_evaluate(lr=0.01, mmtm=0, epochs=10)
 
-    # 1: accuracy 0.
-    # 2: accuracy 0.
-    # 3: accuracy 0.
+    compile_and_evaluate(lr=0.001, mmtm=0, epochs=40)
 
-    print("MAIN")
+    compile_and_evaluate(lr=0.0001, mmtm=0, epochs=100)
+
+    compile_and_evaluate(lr=0.01, mmtm=0.1, epochs=10)
+
+    compile_and_evaluate(lr=0.01, mmtm=0.5, epochs=10)
+
+    compile_and_evaluate(lr=0.01, mmtm=0.9, epochs=10)
