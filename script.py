@@ -76,7 +76,7 @@ def load_images(image_paths, img_size):
     for i in range(max(sizes)):
         for k, f_class in enumerate(image_paths):
             if i < len(f_class):
-                # load image
+                # load image, cv2 uses BGR so convert to RGB for matplotlib and tensorflow
                 img = cv2.cvtColor(cv2.imread(f_class[i]), cv2.COLOR_BGR2RGB) / 255.0
                 x_ = tf.image.resize(img, (img_size, img_size)).numpy()
                 x.append(x_)
@@ -125,16 +125,16 @@ def compile_and_tune(x, y, lr, mmtm, img_size, epochs):
         input_shape=img_dim,
         alpha=1.0, # control width of network layers (less than 1.0 means decreases no. filters, more than 1.0 means increases no. filters)
         include_top=True, # include fully connected layer
-        input_tensor=None, # none
-        pooling=None, # maybe we can edit this?
-        # classes=5, # default was 1000, maybe we dont need to replace last layer with dense layer of 5 if this is already 5?
-        classifier_activation='softmax' # default
+        input_tensor=None,
+        pooling=None,
+        classifier_activation='softmax'
     )
 
     # connect the second last layer to the new dense layer, replacing the original last dense layer
     outputs = layers.Dense(5)(model.layers[-2].output)
     new_model = keras.Model(inputs=model.input, outputs=outputs)
     
+    # freeze all but last 7 layers
     for layer in new_model.layers[:-7]:
         layer.trainable = False
 
@@ -172,6 +172,7 @@ def eval_model(model, x_train, y_train, x_test, y_test, history):
         history: the history of accuracy and loss over the epochs during the training of the neural network model
     """
 
+    # loss/accuracy over epochs graph
     fig = plt.figure(figsize=[21, 6])
     fig.set_facecolor('white')
     ax = fig.add_subplot(1, 3, 1)
@@ -182,6 +183,7 @@ def eval_model(model, x_train, y_train, x_test, y_test, history):
     ax.legend()
     ax.set_title('Training Loss/Accuracy')
 
+    # Training set confusion matrix + accuracy
     ax = fig.add_subplot(1, 3, 2)
     pred = model.predict(x_train)
     best_guesses = tf.argmax(pred, axis=1)
@@ -189,6 +191,7 @@ def eval_model(model, x_train, y_train, x_test, y_test, history):
     confusion_mat.plot(ax = ax)
     ax.set_title('Training Accuracy: ' + str(sum(best_guesses.numpy() == y_train)/len(y_train)))
     
+    # Testing set confusion matrix + accuracy
     ax = fig.add_subplot(1, 3, 3)
     pred = model.predict(x_test)
     best_guesses = tf.argmax(pred, axis=1)
@@ -196,6 +199,7 @@ def eval_model(model, x_train, y_train, x_test, y_test, history):
     confusion_mat.plot(ax = ax)    
     ax.set_title('Testing Accuracy: ' + str(sum(best_guesses.numpy() == y_test)/len(y_test)))
 
+    # Precision, recall, F1-score for testing set
     print(classification_report(y_test, best_guesses))
 
 # END Compile and fine tune model ======================================================
